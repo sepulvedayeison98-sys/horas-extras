@@ -100,9 +100,23 @@ export function RegisterView({ editing, onEdit, onDoneEditing }: Props) {
 
   return (
     <div className="space-y-4">
+      {!editing && (
+        <p className="px-1 text-[11px] text-muted-foreground">
+          Los días laborales normales (lunes a viernes, sin festivo) se autocompletan solos con tu
+          horario habitual. Usa este formulario solo para extras, sábados, domingos, festivos, o para
+          corregir un día autocompletado.
+        </p>
+      )}
       <Card>
         <CardHeader>
-          <CardTitle>{editing ? 'Editar jornada' : 'Registrar jornada'}</CardTitle>
+          <CardTitle>
+            {editing ? 'Editar jornada' : 'Registrar jornada'}
+            {editing?.auto && (
+              <Badge variant="default" className="ml-2 align-middle">
+                Autocompletado
+              </Badge>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div>
@@ -223,6 +237,7 @@ export function RegisterView({ editing, onEdit, onDoneEditing }: Props) {
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
+                    {r.auto && <Badge variant="default">Auto</Badge>}
                     {r.dayType !== 'normal' && <Badge variant="muted">{DAY_TYPE_LABELS[r.dayType]}</Badge>}
                     <Button size="icon" variant="ghost" aria-label="Editar" onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); onEdit(r) }}>
                       <Pencil className="h-4 w-4" />

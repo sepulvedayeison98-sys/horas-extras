@@ -16,6 +16,7 @@ export function loadData(): AppData {
       payments: parsed.payments && typeof parsed.payments === 'object' ? parsed.payments : {},
       // Merge con defaults: si se agregan campos nuevos en futuras versiones, no se pierden datos
       settings: { ...DEFAULT_SETTINGS, ...(parsed.settings ?? {}) },
+      autoFillAnchor: typeof parsed.autoFillAnchor === 'string' ? parsed.autoFillAnchor : undefined,
     }
   } catch {
     return emptyData()

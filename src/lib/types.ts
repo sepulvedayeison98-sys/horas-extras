@@ -14,6 +14,8 @@ export interface WorkdayRecord {
   lunchMinutes: number
   dayType: DayType
   notes?: string
+  /** true si este registro lo creó el autocompletado (no lo tocó el usuario) */
+  auto?: boolean
 }
 
 export type PaymentStatus = 'pendiente' | 'pagada'
@@ -58,6 +60,8 @@ export interface Settings {
   /** Fin de jornada nocturna HH:mm */
   nightEnd: string
   darkMode: boolean
+  /** Autocompleta lunes a viernes no festivos con el horario habitual (ver src/lib/autofill.ts) */
+  autoFillEnabled: boolean
 }
 
 export interface AppData {
@@ -65,6 +69,8 @@ export interface AppData {
   /** Pagos indexados por periodKey */
   payments: Record<string, PaymentRecord>
   settings: Settings
+  /** Última fecha (YYYY-MM-DD) hasta la que ya se ejecutó el autocompletado */
+  autoFillAnchor?: string
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -84,6 +90,7 @@ export const DEFAULT_SETTINGS: Settings = {
   nightStart: '19:00',
   nightEnd: '06:00',
   darkMode: true,
+  autoFillEnabled: true,
 }
 
 export const DAY_TYPE_LABELS: Record<DayType, string> = {

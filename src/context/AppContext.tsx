@@ -15,6 +15,8 @@ import {
 import type { AppData, PaymentRecord, Settings, WorkdayRecord } from '@/lib/types'
 import { loadData, newId, saveData } from '@/lib/storage'
 import { analyzeWorkday, EMPTY_CALC, type DayCalc } from '@/lib/calculations'
+import { computeAutoFill } from '@/lib/autofill'
+import { todayStr } from '@/lib/dates'
 
 interface AppContextValue {
   records: WorkdayRecord[]
@@ -45,6 +47,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', data.settings.darkMode)
   }, [data.settings.darkMode])
+
+  // Autocompletado de jornadas normales (lunes-viernes sin festivo): se
+  // ejecuta una sola vez por apertura de la app.
+  const autoFillRan = useRef(false)
+  useEffect(() => {
+    if (autoFillRan.current) return
+    autoFillRan.current = true
+    setData((d) => {
+      const existingDates = new Set(d.records.map((r) => r.date))
+      const { records, newAnchor } = computeAutoFill(existingDates, d.settings, d.autoFillAnchor, todayStr())
+      if (records.length === 0 && newAnchor === d.autoFillAnchor) return d
+      return { ...d, records: [...d.records, ...records], autoFillAnchor: newAnchor }
+    })
+  }, [])
 
   // Caché de cálculos: se invalida cuando cambia la configuración
   const calcCache = useRef(new Map<string, DayCalc>())

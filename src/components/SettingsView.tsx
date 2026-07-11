@@ -121,6 +121,26 @@ export function SettingsView() {
             <Label htmlFor="s-lunch">Almuerzo por defecto (min)</Label>
             <Input id="s-lunch" type="number" inputMode="numeric" value={form.defaultLunchMinutes} onChange={(e) => num('defaultLunchMinutes', e.target.value)} />
           </div>
+          <div className="flex items-center justify-between rounded-lg bg-muted px-3 py-2.5">
+            <div className="pr-3">
+              <p className="text-xs font-medium">Autocompletar jornada normal</p>
+              <p className="text-[11px] text-muted-foreground">
+                Rellena solo lunes a viernes sin festivo con tu horario habitual. Extras, sábados,
+                domingos y festivos siempre se registran a mano.
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant={form.autoFillEnabled ? 'default' : 'outline'}
+              onClick={() => {
+                const next = !form.autoFillEnabled
+                set('autoFillEnabled', next)
+                updateSettings({ autoFillEnabled: next })
+              }}
+            >
+              {form.autoFillEnabled ? 'Activado' : 'Desactivado'}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

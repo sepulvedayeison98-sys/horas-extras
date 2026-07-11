@@ -119,6 +119,7 @@ export function HistoryView({ onEdit }: Props) {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold">{formatDateShort(r.date)}</p>
+                      {r.auto && <Badge variant="default">Auto</Badge>}
                       {r.dayType !== 'normal' && <Badge variant="danger">{DAY_TYPE_LABELS[r.dayType]}</Badge>}
                       <Badge variant={paid ? 'success' : 'warning'}>{paid ? 'Pagada' : 'Pendiente'}</Badge>
                     </div>
