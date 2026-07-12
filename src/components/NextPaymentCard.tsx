@@ -11,12 +11,12 @@ import { formatCOP, formatHours } from '@/lib/format'
 import { formatDateLong, fromDateStr, todayStr } from '@/lib/dates'
 
 export function NextPaymentCard() {
-  const { records, payments, calcOf } = useApp()
+  const { records, payments, calcOf, settings } = useApp()
   const period = currentPeriod()
-  const cur = summarizePeriod(records, payments, period, calcOf)
-  const prev = summarizePeriod(records, payments, prevPeriod(period), calcOf)
+  const cur = summarizePeriod(records, payments, period, calcOf, settings)
+  const prev = summarizePeriod(records, payments, prevPeriod(period), calcOf, settings)
 
-  const diff = cur.agg.estimatedExtraPay - prev.agg.estimatedExtraPay
+  const diff = cur.totalPay - prev.totalPay
   const daysLeft = Math.max(
     0,
     Math.round((fromDateStr(period.payDate).getTime() - fromDateStr(todayStr()).getTime()) / 86400000),
@@ -39,10 +39,16 @@ export function NextPaymentCard() {
         </span>
       </p>
 
-      <p className="mt-4 text-4xl font-bold tracking-tight">{formatCOP(cur.agg.estimatedExtraPay)}</p>
+      <p className="mt-4 text-4xl font-bold tracking-tight">{formatCOP(cur.totalPay)}</p>
       <p className="mt-1 text-sm text-indigo-100">
         {formatHours(cur.agg.extraTotalHours)} extra acumuladas esta quincena
+        {cur.basePay > 0 && cur.agg.estimatedExtraPay > 0 && ` · ${formatCOP(cur.agg.estimatedExtraPay)} de eso son extras`}
       </p>
+      {cur.basePay === 0 && (
+        <p className="mt-1 text-[11px] text-indigo-200">
+          Este valor es solo de extras. Configura tu salario mensual para ver el pago total.
+        </p>
+      )}
 
       <div className="mt-4 flex items-center gap-2 text-xs">
         {diff >= 0 ? (

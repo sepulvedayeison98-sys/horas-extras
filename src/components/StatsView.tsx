@@ -28,7 +28,7 @@ const MONTH_ABBR = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep
 const AXIS = 'var(--muted-foreground)'
 
 export function StatsView() {
-  const { records, payments, calcOf } = useApp()
+  const { records, payments, calcOf, settings } = useApp()
   const year = new Date().getFullYear()
 
   const monthly = useMemo(() => {
@@ -49,14 +49,14 @@ export function StatsView() {
   const payTrend = useMemo(() => {
     const periods = lastPeriods(currentPeriod(), 6)
     return periods.map((p) => {
-      const s = summarizePeriod(records, payments, p, calcOf)
+      const s = summarizePeriod(records, payments, p, calcOf, settings)
       return {
         quincena: `${p.month}/${p.half === 1 ? 'Q1' : 'Q2'}`,
-        estimado: s.agg.estimatedExtraPay,
+        estimado: s.totalPay,
         pagado: s.payment?.paidAmount ?? 0,
       }
     })
-  }, [records, payments, calcOf])
+  }, [records, payments, calcOf, settings])
 
   if (!hasData) {
     return (

@@ -60,8 +60,8 @@ export function DashboardView() {
 
   const stats = useMemo(() => {
     const period = currentPeriod()
-    const cur = summarizePeriod(records, payments, period, calcOf)
-    const prev = summarizePeriod(records, payments, prevPeriod(period), calcOf)
+    const cur = summarizePeriod(records, payments, period, calcOf, settings)
+    const prev = summarizePeriod(records, payments, prevPeriod(period), calcOf, settings)
 
     const monthAgg = aggregate(recordsInMonth(records, year, month), calcOf)
     const prevMonth = month === 1 ? 12 : month - 1
@@ -82,11 +82,12 @@ export function DashboardView() {
     const perDayExtra = cur.agg.days > 0 ? cur.agg.extraTotalHours / cur.agg.days : 0
     const perDayPay = cur.agg.days > 0 ? cur.agg.estimatedExtraPay / cur.agg.days : 0
     const projectedExtra = cur.agg.extraTotalHours + perDayExtra * remainingBusinessDays
-    const projectedPay = cur.agg.estimatedExtraPay + perDayPay * remainingBusinessDays
+    const projectedExtraPay = cur.agg.estimatedExtraPay + perDayPay * remainingBusinessDays
+    const projectedPay = cur.basePay + projectedExtraPay
 
     // Comparativo contra las últimas 3 quincenas cerradas
-    const last3 = lastPeriods(prevPeriod(period), 3).map((p) => summarizePeriod(records, payments, p, calcOf))
-    const avgLast3Pay = last3.reduce((s, x) => s + x.agg.estimatedExtraPay, 0) / 3
+    const last3 = lastPeriods(prevPeriod(period), 3).map((p) => summarizePeriod(records, payments, p, calcOf, settings))
+    const avgLast3Pay = last3.reduce((s, x) => s + x.totalPay, 0) / 3
 
     // Alertas
     const alerts: { icon: ReactNode; text: string; variant: 'warning' | 'danger' | 'default' }[] = []
@@ -98,7 +99,7 @@ export function DashboardView() {
     )
       .filter((key) => key < period.key)
       .filter((key) => {
-        const s = summarizePeriod(records, payments, periodFromKey(key), calcOf)
+        const s = summarizePeriod(records, payments, periodFromKey(key), calcOf, settings)
         return s.agg.extraTotalHours > 0 && !s.isPaid
       })
       .sort()
@@ -112,12 +113,12 @@ export function DashboardView() {
     }
 
     for (const s of last3.slice(-2)) {
-      if (s.isPaid && s.payment?.paidAmount != null && s.agg.estimatedExtraPay > 0) {
-        const delta = s.payment.paidAmount - s.agg.estimatedExtraPay
-        if (Math.abs(delta) > s.agg.estimatedExtraPay * 0.05) {
+      if (s.isPaid && s.payment?.paidAmount != null && s.totalPay > 0) {
+        const delta = s.payment.paidAmount - s.totalPay
+        if (Math.abs(delta) > s.totalPay * 0.05) {
           alerts.push({
             icon: <AlertTriangle className="h-4 w-4" />,
-            text: `Diferencia en ${s.period.label}: pagado ${formatCOP(s.payment.paidAmount)} vs. estimado ${formatCOP(s.agg.estimatedExtraPay)}`,
+            text: `Diferencia en ${s.period.label}: pagado ${formatCOP(s.payment.paidAmount)} vs. estimado ${formatCOP(s.totalPay)}`,
             variant: 'danger',
           })
         }
@@ -148,7 +149,7 @@ export function DashboardView() {
       alerts,
       remainingBusinessDays,
     }
-  }, [records, payments, calcOf, today, year, month])
+  }, [records, payments, calcOf, settings, today, year, month])
 
   const paidThisYear = useMemo(() => totalPaidInYear(payments, year), [payments, year])
   const monthDiff = formatDiffPct(stats.monthAgg.extraTotalHours, stats.prevMonthAgg.extraTotalHours)

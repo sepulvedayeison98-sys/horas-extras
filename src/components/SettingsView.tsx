@@ -150,9 +150,26 @@ export function SettingsView() {
           <CardTitle>Valores y recargos</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="s-salary">Salario mensual (COP)</Label>
+              <Input id="s-salary" type="number" inputMode="numeric" value={form.monthlySalary} onChange={(e) => num('monthlySalary', e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="s-transport">Auxilio transporte/mes (COP)</Label>
+              <Input id="s-transport" type="number" inputMode="numeric" value={form.transportAllowance} onChange={(e) => num('transportAllowance', e.target.value)} />
+            </div>
+          </div>
+          <p className="rounded-lg bg-muted px-3 py-2 text-[11px] text-muted-foreground">
+            El "valor estimado a pagar" de cada quincena = salario mensual ÷ 2 + auxilio ÷ 2 + extras/recargos.
+            Déjalos en 0 si prefieres ver solo el valor de extras (como antes).
+          </p>
           <div>
             <Label htmlFor="s-rate">Valor hora ordinaria (COP)</Label>
             <Input id="s-rate" type="number" inputMode="numeric" value={form.hourlyRate} onChange={(e) => num('hourlyRate', e.target.value)} />
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              Se usa SOLO para calcular extras y recargos, no para el salario base. Aprox.: salario mensual ÷ 240.
+            </p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>

@@ -44,8 +44,17 @@ export interface Settings {
   defaultStart: string
   defaultEnd: string
   defaultLunchMinutes: number
-  /** Valor hora ordinaria (COP) */
+  /** Valor hora ordinaria (COP). Usado SOLO para calcular extras/recargos. */
   hourlyRate: number
+  /**
+   * Salario mensual base (COP). Si se configura, el "valor estimado a pagar"
+   * de cada quincena incluye salarioMensual/2 además de las extras — porque
+   * el salario en Colombia es un monto fijo mensual, no horas × valor/hora.
+   * En 0 (sin configurar), la app solo muestra el valor de extras/recargos.
+   */
+  monthlySalary: number
+  /** Auxilio de transporte mensual (COP), si aplica. Se prorratea igual que el salario. */
+  transportAllowance: number
   /** Recargo hora extra diurna, % (ej. 25) */
   overtimeDayPct: number
   /** Recargo hora extra nocturna, % (ej. 75) */
@@ -82,6 +91,8 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultEnd: '18:00',
   defaultLunchMinutes: 60,
   hourlyRate: 12000,
+  monthlySalary: 0,
+  transportAllowance: 0,
   overtimeDayPct: 25,
   overtimeNightPct: 75,
   nightSurchargePct: 35,

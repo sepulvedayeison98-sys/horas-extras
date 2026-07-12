@@ -35,12 +35,12 @@ export function QuincenaView() {
   const [payNotes, setPayNotes] = useState('')
 
   const summary = useMemo(
-    () => summarizePeriod(records, payments, period, calcOf),
-    [records, payments, period, calcOf],
+    () => summarizePeriod(records, payments, period, calcOf, settings),
+    [records, payments, period, calcOf, settings],
   )
   const prev = useMemo(
-    () => summarizePeriod(records, payments, prevPeriod(period), calcOf),
-    [records, payments, period, calcOf],
+    () => summarizePeriod(records, payments, prevPeriod(period), calcOf, settings),
+    [records, payments, period, calcOf, settings],
   )
   const excess = useMemo(
     () => weeklyExcess(recordsInPeriod(records, period), settings, calcOf),
@@ -48,7 +48,7 @@ export function QuincenaView() {
   )
 
   const isCurrent = period.key === currentPeriod().key
-  const diffPay = summary.agg.estimatedExtraPay - prev.agg.estimatedExtraPay
+  const diffPay = summary.totalPay - prev.totalPay
 
   const paymentHistory = useMemo(
     () =>
@@ -60,7 +60,7 @@ export function QuincenaView() {
 
   function openPayDialog() {
     setPayDate(todayStr())
-    setPayAmount(String(summary.agg.estimatedExtraPay))
+    setPayAmount(String(summary.totalPay))
     setPayNotes('')
     setPayOpen(true)
   }
@@ -119,7 +119,18 @@ export function QuincenaView() {
           <Row label="Sábados trabajados" value={String(summary.agg.saturdaysWorked)} />
           <Row label="Domingos trabajados" value={String(summary.agg.sundaysWorked)} />
           <Row label="Festivos trabajados" value={String(summary.agg.holidaysWorked)} />
-          <Row label="Valor estimado a pagar" value={formatCOP(summary.agg.estimatedExtraPay)} strong />
+          {summary.basePay > 0 && (
+            <>
+              <Row label="Salario base (quincena)" value={formatCOP(summary.basePay)} />
+              <Row label="Valor extras/recargos" value={formatCOP(summary.agg.estimatedExtraPay)} />
+            </>
+          )}
+          <Row label="Valor estimado a pagar" value={formatCOP(summary.totalPay)} strong />
+          {summary.basePay === 0 && (
+            <p className="pt-1 text-[11px] text-muted-foreground">
+              Solo incluye extras/recargos. Configura tu salario mensual para ver el total.
+            </p>
+          )}
           {summary.isPaid && summary.payment?.paidAmount != null && (
             <Row label={`Pagado el ${summary.payment.paidDate ? formatDateShort(summary.payment.paidDate) : '—'}`} value={formatCOP(summary.payment.paidAmount)} strong />
           )}
@@ -149,7 +160,7 @@ export function QuincenaView() {
             {diffPay >= 0 ? '+' : '−'}{formatCOP(Math.abs(diffPay))}
           </p>
           <p className="text-xs text-muted-foreground">
-            Anterior ({prev.period.label}): {formatCOP(prev.agg.estimatedExtraPay)} · {formatHours(prev.agg.extraTotalHours)} extra
+            Anterior ({prev.period.label}): {formatCOP(prev.totalPay)} · {formatHours(prev.agg.extraTotalHours)} extra
           </p>
         </CardContent>
       </Card>
@@ -233,7 +244,7 @@ export function QuincenaView() {
               onChange={(e) => setPayAmount(e.target.value)}
             />
             <p className="mt-1 text-[11px] text-muted-foreground">
-              Estimado por la app: {formatCOP(summary.agg.estimatedExtraPay)}
+              Estimado por la app: {formatCOP(summary.totalPay)}
             </p>
           </div>
           <div>
